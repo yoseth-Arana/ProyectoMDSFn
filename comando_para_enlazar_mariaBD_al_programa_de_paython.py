@@ -1,32 +1,18 @@
-from grovepi import *
-from grove_rgb_lcd import *
-import time 
-import MySQLdb as sql
+-- 1. Entrar a MariaDB como administrador
+sudo mysql -u root -p -h localhost
 
-conexion = sql.connect(host='localhost',user='admin', passwd='1234',db='mds')
-curs = conexion.cursor()
+-- 2. Crear la base de datos que usa tu script
+create database mds;
+use mds;
 
-dht_sensor_port = 7 
+-- 3. Crear el usuario 'admin' con su contraseña '1234'
+create user 'admin'@'localhost' identified by '1234';
+grant all privileges on mds.* to 'admin'@'localhost';
+flush privileges;
 
-while True:
-    try:
-        [Temp, humed] = dht(dht_sensor_port, 0) 
-        print("Temp =", Temp, "C\tHumidity =", humed, "%")
+-- 4. Crear la tabla 'DatosH' con las columnas para temperatura y humedad
+create table DatosH (temp varchar(20), humed varchar(20));
 
-        temp = str(Temp)
-        humed = str(humed)
-
-        setRGB(0, 128, 64)  
-        setRGB(0,255,0)
-        setText("Temp: " + temp + "C     Humidity: " + humed + "%")
-        
-        curs.execute("insert into DatosH (temp, humed) values ("+ temp + ","+ humed +");")
-
-    except sql.Error as e:
-        print("Error:", e)
-        
-    curs.execute("select * from DatosH")
-    for temp,humed in curs.fetchall():
-        print(temp, humed)
-        conexion.commit()
-    #conexion.close()
+-- 5. Verificar que la tabla se creó bien y salir
+show tables;
+exit;
